@@ -49,10 +49,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
             @Override
             public void onClick(View v) {
                 if(CurrentSongService.getInstance() != null) {
-                    showLoadingDialog();
-                    CurrentSongService currentSongService = CurrentSongService.getInstance();
-                    Search.addListener(MainActivity.this);
-                    Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
+                    openCurrentSongLyrics();
                 }
             }
         });
@@ -64,6 +61,15 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         }
         else {
             onServiceStarted();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(CurrentSongService.getInstance() != null && CurrentSongService.getInstance().isMusicPlaying()) {
+            openCurrentSongLyrics();
         }
     }
 
@@ -95,6 +101,13 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
         progressBar.setVisibility(View.GONE);
         updateCurrentlyPlaying();
+    }
+
+    private void openCurrentSongLyrics() {
+        showLoadingDialog();
+        CurrentSongService currentSongService = CurrentSongService.getInstance();
+        Search.addListener(MainActivity.this);
+        Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
     }
 
     private void updateCurrentlyPlaying() {
