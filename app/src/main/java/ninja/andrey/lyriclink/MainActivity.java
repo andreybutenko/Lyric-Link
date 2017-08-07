@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(this, CurrentSongService.class);
 
         musicTrack = (TextView) findViewById(R.id.musicTrack);
         musicAlbum = (TextView) findViewById(R.id.musicAlbum);
@@ -54,8 +53,14 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
             }
         });
 
-        waitForServiceStart();
-        startService(intent);
+        if(CurrentSongService.getInstance() == null) {
+            waitForServiceStart();
+            Intent intent = new Intent(this, CurrentSongService.class);
+            startService(intent);
+        }
+        else {
+            onServiceStarted();
+        }
     }
 
     private void waitForServiceStart() {
