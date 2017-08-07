@@ -73,6 +73,52 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(CurrentSongService.getInstance() != null && CurrentSongService.getInstance().hasListener(this)) {
+            CurrentSongService.getInstance().removeListener(this);
+        }
+    }
+
+    // Methods
+
+    private void updateCurrentlyPlaying() {
+        CurrentSongService currentSongService = CurrentSongService.getInstance();
+        if(currentSongService.isMusicPlaying()) {
+            noMusicText.setVisibility(View.GONE);
+            musicPlayingContainer.setVisibility(View.VISIBLE);
+            musicTrack.setText(currentSongService.getCurrentTrack());
+            musicAlbum.setText(currentSongService.getCurrentAlbum());
+            musicArtist.setText(currentSongService.getCurrentArtist());
+        }
+        else {
+            noMusicText.setVisibility(View.VISIBLE);
+            musicPlayingContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private void openCurrentSongLyrics() {
+        CurrentSongService currentSongService = CurrentSongService.getInstance();
+        showLoadingDialog(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
+        Search.addListener(MainActivity.this);
+        Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
+    }
+
+    private void showLoadingDialog(String track, String artist) {
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setTitle(track + " by " + artist);
+        progressDialog.setMessage(getResources().getString(R.string.loading_lyrics_desc));
+        progressDialog.setIndeterminate(true);
+        progressDialog.show();
+    }
+
+    private void dismissLoadingDialog() {
+        progressDialog.dismiss();
+    }
+
+    // Services and Listeners
+
     private void waitForServiceStart() {
         final Timer timer = new Timer();
 
@@ -101,48 +147,6 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
         progressBar.setVisibility(View.GONE);
         updateCurrentlyPlaying();
-    }
-
-    private void openCurrentSongLyrics() {
-        CurrentSongService currentSongService = CurrentSongService.getInstance();
-        showLoadingDialog(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
-        Search.addListener(MainActivity.this);
-        Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
-    }
-
-    private void updateCurrentlyPlaying() {
-        CurrentSongService currentSongService = CurrentSongService.getInstance();
-        if(currentSongService.isMusicPlaying()) {
-            noMusicText.setVisibility(View.GONE);
-            musicPlayingContainer.setVisibility(View.VISIBLE);
-            musicTrack.setText(currentSongService.getCurrentTrack());
-            musicAlbum.setText(currentSongService.getCurrentAlbum());
-            musicArtist.setText(currentSongService.getCurrentArtist());
-        }
-        else {
-            noMusicText.setVisibility(View.VISIBLE);
-            musicPlayingContainer.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(CurrentSongService.getInstance() != null && CurrentSongService.getInstance().hasListener(this)) {
-            CurrentSongService.getInstance().removeListener(this);
-        }
-    }
-
-    private void showLoadingDialog(String track, String artist) {
-        progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setTitle(track + " by " + artist);
-        progressDialog.setMessage(getResources().getString(R.string.loading_lyrics_desc));
-        progressDialog.setIndeterminate(true);
-        progressDialog.show();
-    }
-
-    private void dismissLoadingDialog() {
-        progressDialog.dismiss();
     }
 
     @Override
