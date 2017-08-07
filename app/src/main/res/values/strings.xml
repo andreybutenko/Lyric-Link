@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Lyric Link</string>
+    <string name="no_track_txt">No song is currently playing</string>
+    <string name="see_lyrics_btn">See Lyrics</string>
+    <string name="set_preferred_btn">Set Preferred Lyrics Site</string>
+    <string name="set_preferred_title">Set Preferred Provider</string>
+    <string name="set_preferred_desc">Lyric Link will try to use your selected website for getting your song lyrics.</string>
+</resources>
