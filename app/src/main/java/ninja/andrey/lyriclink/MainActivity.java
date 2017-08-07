@@ -17,7 +17,8 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements CurrentSongService.SongListener, Search.SearchListener {
 
-    private static final long TIMER_RATE = 100;
+    private static final long TIMER_RATE = 100; // how often to check if service started
+    private static final long INSTANT_LYRICS_COOLDOWN = 60 * 1000; // how long before instantly opening lyrics again
 
     TextView musicTrack;
     TextView musicAlbum;
@@ -68,7 +69,11 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     protected void onResume() {
         super.onResume();
 
-        if(CurrentSongService.getInstance() != null && CurrentSongService.getInstance().isMusicPlaying()) {
+        UserData userData = new UserData(this);
+
+        if(CurrentSongService.getInstance() != null &&
+                CurrentSongService.getInstance().isMusicPlaying() &&
+                System.currentTimeMillis() - userData.getLatestLyricLookupTime() > INSTANT_LYRICS_COOLDOWN) {
             openCurrentSongLyrics();
         }
     }
@@ -156,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
     @Override
     public void onSearchUrlLoaded(String url) {
+        UserData userData = new UserData(this);
+        userData.setLatestLyricLookupTime(System.currentTimeMillis());
+
         dismissLoadingDialog();
         Search.removeListener(MainActivity.this);
         Intent intent = Search.getLyricIntent(url);
