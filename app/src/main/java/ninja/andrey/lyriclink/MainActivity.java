@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     }
 
     private void openCurrentSongLyrics() {
-        showLoadingDialog();
         CurrentSongService currentSongService = CurrentSongService.getInstance();
+        showLoadingDialog(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
         Search.addListener(MainActivity.this);
         Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
     }
@@ -133,9 +133,9 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         }
     }
 
-    private void showLoadingDialog() {
+    private void showLoadingDialog(String track, String artist) {
         progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setTitle(getResources().getString(R.string.loading_lyrics_title));
+        progressDialog.setTitle(track + " by " + artist);
         progressDialog.setMessage(getResources().getString(R.string.loading_lyrics_desc));
         progressDialog.setIndeterminate(true);
         progressDialog.show();
