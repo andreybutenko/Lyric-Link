@@ -5,4 +5,6 @@
     <string name="set_preferred_btn">Set Preferred Lyrics Site</string>
     <string name="set_preferred_title">Set Preferred Provider</string>
     <string name="set_preferred_desc">Lyric Link will try to use your selected website for getting your song lyrics.</string>
+    <string name="loading_lyrics_title">Loading lyrics…</string>
+    <string name="loading_lyrics_desc">Get ready!</string>
 </resources>

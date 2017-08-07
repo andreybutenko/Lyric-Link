@@ -1,5 +1,6 @@
 package ninja.andrey.lyriclink;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     ProgressBar progressBar;
     TextView noMusicText;
 
+    ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
             @Override
             public void onClick(View v) {
                 if(CurrentSongService.getInstance() != null) {
+                    showLoadingDialog();
                     CurrentSongService currentSongService = CurrentSongService.getInstance();
                     Search.addListener(MainActivity.this);
                     Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
@@ -116,6 +120,18 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         }
     }
 
+    private void showLoadingDialog() {
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setTitle(getResources().getString(R.string.loading_lyrics_title));
+        progressDialog.setMessage(getResources().getString(R.string.loading_lyrics_desc));
+        progressDialog.setIndeterminate(true);
+        progressDialog.show();
+    }
+
+    private void dismissLoadingDialog() {
+        progressDialog.dismiss();
+    }
+
     @Override
     public void onSongChanged(String track, String album, String artist) {
         updateCurrentlyPlaying();
@@ -123,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
     @Override
     public void onSearchUrlLoaded(String url) {
+        dismissLoadingDialog();
         Search.removeListener(MainActivity.this);
         Intent intent = Search.getLyricIntent(url);
         startActivity(intent);
