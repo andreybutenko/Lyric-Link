@@ -117,7 +117,7 @@
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/preferredBtn"
+            android:id="@+id/settingsBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -126,8 +126,7 @@
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:layout_weight="0"
-            android:text="@string/set_preferred_btn"
-            android:visibility="gone" />
+            android:text="@string/settings_txt" />
     </RelativeLayout>
 
 </LinearLayout>

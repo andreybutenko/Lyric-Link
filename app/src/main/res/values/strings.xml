@@ -1,9 +1,17 @@
 <resources>
     <string name="app_name">Lyric Link</string>
+
     <string name="no_track_txt">No song is currently playing</string>
     <string name="see_lyrics_btn">See Lyrics</string>
+    <string name="loading_lyrics_desc">Loading lyrics…</string>
+    <string name="settings_txt">Settings</string>
+
     <string name="set_preferred_btn">Set Preferred Lyrics Site</string>
     <string name="set_preferred_title">Set Preferred Provider</string>
     <string name="set_preferred_desc">Lyric Link will try to use your selected website for getting your song lyrics.</string>
-    <string name="loading_lyrics_desc">Loading lyrics…</string>
+
+    <string name="instant_lyrics_enabled_title">Instant lyrics</string>
+    <string name="instant_lyrics_enabled_desc">When enabled, the app will open directly to the lyrics of the currently-playing track.</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="action_settings">Settings</string>
 </resources>

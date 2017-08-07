@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     TextView musicArtist;
     LinearLayout musicPlayingContainer;
     Button seeLyricsBtn;
-    Button preferredBtn;
+    Button settingsBtn;
     ProgressBar progressBar;
     TextView noMusicText;
 
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         musicArtist = (TextView) findViewById(R.id.musicArtist);
         musicPlayingContainer = (LinearLayout) findViewById(R.id.musicPlayingContainer);
         seeLyricsBtn = (Button) findViewById(R.id.seeLyricsBtn);
-        preferredBtn = (Button) findViewById(R.id.preferredBtn);
+        settingsBtn = (Button) findViewById(R.id.settingsBtn);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         noMusicText = (TextView) findViewById(R.id.noMusicText);
 
@@ -52,6 +52,13 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
                 if(CurrentSongService.getInstance() != null) {
                     openCurrentSongLyrics();
                 }
+            }
+        });
+
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             }
         });
 
@@ -73,7 +80,8 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
         if(CurrentSongService.getInstance() != null &&
                 CurrentSongService.getInstance().isMusicPlaying() &&
-                System.currentTimeMillis() - userData.getLatestLyricLookupTime() > INSTANT_LYRICS_COOLDOWN) {
+                System.currentTimeMillis() - userData.getLatestLyricLookupTime() > INSTANT_LYRICS_COOLDOWN &&
+                userData.getInstantLyricsEnabled()) {
             openCurrentSongLyrics();
         }
     }
