@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="preferred_providers">
+        <item>Automatic</item>
+        <item>Google Play</item>
+        <item>Dark Lyrics</item>
+        <item>AZ Lyrics</item>
+        <item>Genius</item>
+        <item>SongLyrics</item>
+    </string-array>
+    <string-array name="preferred_providers_value">
+        <item> </item>
+        <item>play.google.com</item>
+        <item>darklyrics.com</item>
+        <item>azlyrics.com</item>
+        <item>genius.com</item>
+        <item>songlyrics.com</item>
+    </string-array>
+</resources>

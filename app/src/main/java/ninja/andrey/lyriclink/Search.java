@@ -3,12 +3,9 @@ package ninja.andrey.lyriclink;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.text.Html;
 import android.util.Log;
 
 import org.jsoup.Jsoup;
-import org.jsoup.examples.HtmlToPlainText;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -28,8 +25,6 @@ public class Search {
 
     private static List<SearchListener> searchListenerList = new ArrayList<>();
 
-    public static final String[] preferredProviders = new String[]{"play.google.com", "darklyrics.com", "azlyrics.com", "genius.com", "songlyrics.com"};
-
     public static Intent getLyricIntent(String url) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
@@ -41,9 +36,19 @@ public class Search {
     }
 
     public static String getPreferredUrl(List<String> searchResults) {
-        for(String provider : preferredProviders) {
+        for(Provider provider : Provider.values()) {
+            if(provider == Provider.DEFAULT) {
+                UserData userData = new UserData(LyricLinkApplication.getContext());
+                Provider preferredProvider = userData.getPreferredProvider();
+
+                if(preferredProvider == Provider.DEFAULT)
+                    continue;
+                else
+                    provider = preferredProvider;
+            }
+
             for(String url : searchResults) {
-                if(url.contains(provider)) {
+                if(url.contains(provider.getUrl())) {
                     return url;
                 }
             }

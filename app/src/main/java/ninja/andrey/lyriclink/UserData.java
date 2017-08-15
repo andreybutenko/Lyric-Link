@@ -2,6 +2,7 @@ package ninja.andrey.lyriclink;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
 /**
@@ -13,6 +14,7 @@ public class UserData {
 
     public static final String LATEST_LYRIC_LOOKUP_TIME = "LATEST_LYRIC_LOOKUP_TIME";
     public static final String INSTANT_LYRICS_ENABLED = "INSTANT_LYRICS_ENABLED";
+    public static final String PREFERRED_PROVIDER = "PREFERRED_PROVIDER";
 
     UserData(Context context) {
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);;
@@ -48,5 +50,19 @@ public class UserData {
     public boolean getInstantLyricsEnabled() {
         return getSharedPreferences()
                 .getBoolean(INSTANT_LYRICS_ENABLED, true);
+    }
+
+    public void setPreferredProvider(Provider provider) {
+        getSharedPreferences()
+                .edit()
+                .putString(PREFERRED_PROVIDER, provider.getUrl())
+                .apply();
+    }
+
+    public Provider getPreferredProvider() {
+        String preferredProvider = getSharedPreferences()
+                .getString(PREFERRED_PROVIDER, "");
+
+        return Provider.getProviderByUrl(preferredProvider);
     }
 }

@@ -9,4 +9,12 @@
         android:title="@string/instant_lyrics_enabled_title"
         android:summary="@string/instant_lyrics_enabled_desc"
         android:defaultValue="true" />
+
+    <ListPreference
+        android:key="PREFERRED_PROVIDER"
+        android:title="@string/preferred_provider_title"
+        android:summary="@string/preferred_provider_default_desc"
+        android:entries="@array/preferred_providers"
+        android:entryValues="@array/preferred_providers_value"
+        android:defaultValue=" " />
 </PreferenceScreen>
