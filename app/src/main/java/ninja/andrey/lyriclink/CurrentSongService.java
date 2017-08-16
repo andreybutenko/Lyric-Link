@@ -75,6 +75,9 @@ public class CurrentSongService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if(!intent.hasExtra("artist") || !intent.hasExtra("album") || !intent.hasExtra("track"))
+                return;
+            
             String artist = intent.getStringExtra("artist");
             String album = intent.getStringExtra("album");
             String track = intent.getStringExtra("track");
