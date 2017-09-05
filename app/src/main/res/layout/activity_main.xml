@@ -26,14 +26,6 @@
         android:padding="16dp"
         android:theme="@style/Base.Theme.AppCompat.Light">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:indeterminate="true" />
-
         <TextView
             android:id="@+id/noMusicText"
             android:layout_width="match_parent"

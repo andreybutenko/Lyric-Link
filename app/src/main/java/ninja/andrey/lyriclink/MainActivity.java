@@ -1,14 +1,18 @@
 package ninja.andrey.lyriclink;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -26,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     LinearLayout musicPlayingContainer;
     Button seeLyricsBtn;
     Button settingsBtn;
-    ProgressBar progressBar;
     TextView noMusicText;
 
     ProgressDialog progressDialog;
@@ -43,13 +46,12 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         musicPlayingContainer = (LinearLayout) findViewById(R.id.musicPlayingContainer);
         seeLyricsBtn = (Button) findViewById(R.id.seeLyricsBtn);
         settingsBtn = (Button) findViewById(R.id.settingsBtn);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         noMusicText = (TextView) findViewById(R.id.noMusicText);
 
         seeLyricsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(CurrentSongService.getInstance() != null) {
+                if(CurrentSongService.isStarted()) {
                     openCurrentSongLyrics();
                 }
             }
@@ -62,13 +64,41 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
             }
         });
 
-        if(CurrentSongService.getInstance() == null) {
-            waitForServiceStart();
-            Intent intent = new Intent(this, CurrentSongService.class);
-            startService(intent);
+        // If music is playing, play/pause it to trigger the intent we need
+
+        AudioManager audioManager;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            audioManager = MainActivity.this.getSystemService(AudioManager.class);
         }
         else {
-            onServiceStarted();
+            audioManager = (AudioManager) MainActivity.this.getSystemService(Context.AUDIO_SERVICE);
+        }
+
+        if (audioManager.isMusicActive() && !CurrentSongService.isStarted()) {
+            KeyEvent playEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY);
+            KeyEvent pauseEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                audioManager.dispatchMediaKeyEvent(pauseEvent);
+                audioManager.dispatchMediaKeyEvent(playEvent);
+            }
+
+            Intent intent = new Intent(this, CurrentSongService.class);
+            startService(intent);
+
+            final Timer timer = new Timer();
+
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if(CurrentSongService.isStarted()) {
+                        timer.cancel();
+                        CurrentSongService.getInstance().addListener(MainActivity.this);
+                    }
+                }
+            };
+
+            timer.scheduleAtFixedRate(timerTask, TIMER_RATE, TIMER_RATE);
         }
     }
 
@@ -78,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
         UserData userData = new UserData(this);
 
-        if(CurrentSongService.getInstance() != null &&
+        if(CurrentSongService.isStarted() &&
                 CurrentSongService.getInstance().isMusicPlaying() &&
                 System.currentTimeMillis() - userData.getLatestLyricLookupTime() > INSTANT_LYRICS_COOLDOWN &&
                 userData.getInstantLyricsEnabled()) {
@@ -89,12 +119,14 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(CurrentSongService.getInstance() != null && CurrentSongService.getInstance().hasListener(this)) {
+        if(CurrentSongService.isStarted() && CurrentSongService.getInstance().hasListener(this)) {
             CurrentSongService.getInstance().removeListener(this);
         }
-    }
 
-    // Methods
+        if(CurrentSongService.isStarted()) {
+            CurrentSongService.getInstance().killService();
+        }
+    }
 
     private void updateCurrentlyPlaying() {
         CurrentSongService currentSongService = CurrentSongService.getInstance();
@@ -128,38 +160,6 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
 
     private void dismissLoadingDialog() {
         progressDialog.dismiss();
-    }
-
-    // Services and Listeners
-
-    private void waitForServiceStart() {
-        final Timer timer = new Timer();
-
-        final Runnable completedRunnable = new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.this.onServiceStarted();
-            }
-        };
-
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                if(CurrentSongService.getInstance() != null) {
-                    timer.cancel();
-                    runOnUiThread(completedRunnable);
-                }
-            }
-        };
-
-        timer.scheduleAtFixedRate(timerTask, TIMER_RATE, TIMER_RATE);
-    }
-
-    private void onServiceStarted() {
-        CurrentSongService.getInstance().addListener(MainActivity.this);
-
-        progressBar.setVisibility(View.GONE);
-        updateCurrentlyPlaying();
     }
 
     @Override

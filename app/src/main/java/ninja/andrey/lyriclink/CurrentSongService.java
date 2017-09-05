@@ -71,6 +71,11 @@ public class CurrentSongService extends Service {
         CurrentSongService.INSTANCE = this;
     }
 
+    public void killService() {
+        CurrentSongService.INSTANCE = null;
+        this.stopSelf();
+    }
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -139,6 +144,10 @@ public class CurrentSongService extends Service {
     }
 
     // Misc
+
+    public static boolean isStarted() {
+        return CurrentSongService.getInstance() != null;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
