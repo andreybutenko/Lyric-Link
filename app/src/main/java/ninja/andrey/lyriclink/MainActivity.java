@@ -106,12 +106,7 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     protected void onResume() {
         super.onResume();
 
-        UserData userData = new UserData(this);
-
-        if(CurrentSongService.isStarted() &&
-                CurrentSongService.getInstance().isMusicPlaying() &&
-                System.currentTimeMillis() - userData.getLatestLyricLookupTime() > INSTANT_LYRICS_COOLDOWN &&
-                userData.getInstantLyricsEnabled()) {
+        if(readyForInstantLyrics()) {
             openCurrentSongLyrics();
         }
     }
@@ -128,6 +123,15 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         }
     }
 
+    private boolean readyForInstantLyrics() {
+        UserData userData = new UserData(this);
+
+        return CurrentSongService.isStarted() &&
+            CurrentSongService.getInstance().isMusicPlaying() &&
+            System.currentTimeMillis() - userData.getLatestLyricLookupTime() > INSTANT_LYRICS_COOLDOWN &&
+            userData.getInstantLyricsEnabled();
+    }
+
     private void updateCurrentlyPlaying() {
         CurrentSongService currentSongService = CurrentSongService.getInstance();
         if(currentSongService.isMusicPlaying()) {
@@ -140,6 +144,10 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         else {
             noMusicText.setVisibility(View.VISIBLE);
             musicPlayingContainer.setVisibility(View.GONE);
+        }
+
+        if(readyForInstantLyrics()) {
+            openCurrentSongLyrics();
         }
     }
 
