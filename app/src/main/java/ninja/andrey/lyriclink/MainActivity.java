@@ -181,8 +181,17 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
         userData.setLatestLyricLookupTime(System.currentTimeMillis());
 
         dismissLoadingDialog();
-        Search.removeListener(MainActivity.this);
         Intent intent = Search.getLyricIntent(url);
         startActivity(intent);
+
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                Search.removeListener(MainActivity.this);
+            }
+        };
+
+        timer.schedule(timerTask, TIMER_RATE);
     }
 }
