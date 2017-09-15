@@ -113,5 +113,6 @@ public class Search {
         for(SearchListener searchListener : searchListenerList) {
             searchListener.onSearchUrlLoaded(url);
         }
+        searchListenerList.clear();
     }
 }

@@ -72,6 +72,8 @@ public class CurrentSongService extends Service {
     }
 
     public void killService() {
+        Log.d(TAG, "Killing service!");
+        unregisterReceiver(broadcastReceiver);
         CurrentSongService.INSTANCE = null;
         this.stopSelf();
     }
@@ -135,6 +137,10 @@ public class CurrentSongService extends Service {
 
     public boolean hasListener(SongListener songListener) {
         return songListenerList.contains(songListener);
+    }
+
+    public void triggerListeners() {
+        notifyListeners(currentTrack, currentAlbum, currentArtist);
     }
 
     private void notifyListeners(String track, String album, String artist) {

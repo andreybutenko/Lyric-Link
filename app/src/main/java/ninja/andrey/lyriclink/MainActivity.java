@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,8 +22,12 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements CurrentSongService.SongListener, Search.SearchListener {
 
+    private static final String TAG = "LyricLinkMain";
+
     private static final long TIMER_RATE = 100; // how often to check if service started
     private static final long INSTANT_LYRICS_COOLDOWN = 60 * 1000; // how long before instantly opening lyrics again
+
+    boolean loadingLyrics = false;
 
     TextView musicTrack;
     TextView musicAlbum;
@@ -64,8 +69,32 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
             }
         });
 
+        refreshCurrentSong();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        refreshCurrentSong();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(CurrentSongService.isStarted() && CurrentSongService.getInstance().hasListener(this)) {
+            CurrentSongService.getInstance().removeListener(this);
+        }
+
+        if(CurrentSongService.isStarted()) {
+            CurrentSongService.getInstance().killService();
+        }
+    }
+
+    private void refreshCurrentSong() {
         // If music is playing, play/pause it to trigger the intent we need
 
+        Log.d(TAG, "Refreshing current song...");
         AudioManager audioManager;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             audioManager = MainActivity.this.getSystemService(AudioManager.class);
@@ -94,33 +123,19 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
                     if(CurrentSongService.isStarted()) {
                         timer.cancel();
                         CurrentSongService.getInstance().addListener(MainActivity.this);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateCurrentlyPlaying();
+                            }
+                        });
                     }
                 }
             };
 
             timer.scheduleAtFixedRate(timerTask, TIMER_RATE, TIMER_RATE);
         }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if(readyForInstantLyrics()) {
-            openCurrentSongLyrics();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(CurrentSongService.isStarted() && CurrentSongService.getInstance().hasListener(this)) {
-            CurrentSongService.getInstance().removeListener(this);
-        }
-
-        if(CurrentSongService.isStarted()) {
-            CurrentSongService.getInstance().killService();
-        }
     }
 
     private boolean readyForInstantLyrics() {
@@ -152,10 +167,14 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     }
 
     private void openCurrentSongLyrics() {
-        CurrentSongService currentSongService = CurrentSongService.getInstance();
-        showLoadingDialog(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
-        Search.addListener(MainActivity.this);
-        Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
+        Log.d(TAG, "Opening current song lyrics!");
+        if(!loadingLyrics) {
+            loadingLyrics = true;
+            CurrentSongService currentSongService = CurrentSongService.getInstance();
+            showLoadingDialog(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
+            Search.addListener(MainActivity.this);
+            Search.loadLyricsUrl(currentSongService.getCurrentTrack(), currentSongService.getCurrentArtist());
+        }
     }
 
     private void showLoadingDialog(String track, String artist) {
@@ -179,19 +198,10 @@ public class MainActivity extends AppCompatActivity implements CurrentSongServic
     public void onSearchUrlLoaded(String url) {
         UserData userData = new UserData(this);
         userData.setLatestLyricLookupTime(System.currentTimeMillis());
+        loadingLyrics = false;
 
         dismissLoadingDialog();
         Intent intent = Search.getLyricIntent(url);
         startActivity(intent);
-
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                Search.removeListener(MainActivity.this);
-            }
-        };
-
-        timer.schedule(timerTask, TIMER_RATE);
     }
 }
